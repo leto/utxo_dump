@@ -1,3 +1,11 @@
-Run like:
+# UTXO Dumper
 
-./dump.py ~/.bitcoin OUTPUT_DIR --verbose=True --reindex=True --bitcoind ~/src/bitcoin/src/bitcoind --blockheight=504000
+This talks directly to the internal Bitcoin LevelDB to dump UTXO data.
+
+# Example
+
+./dump.py ~/.bitcoin ~/utxos/ --verbose=True 
+
+# Install
+
+pip install -r requirements.txt
