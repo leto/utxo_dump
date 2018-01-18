@@ -6,7 +6,7 @@ from binascii import hexlify
 from utxo.chainstate import ldb_iter
 from utxo.script import unwitness
 from utxo.util import new_utxo_file
-
+from utxo.b128 import decompress_amount
 
 def snap_utxos(bitcoind, bitcoind_datadir, stop_block):
 
@@ -28,9 +28,13 @@ def dump_utxos(datadir, output_dir, n, convert_segwit, maxT=0, debug=True):
         if convert_segwit:
             script = unwitness(script, debug)
 
+
+        amount =  "%d.%08d" %  (amt / 100000000 , amt % 100000000 )
         if debug:
-            print(k, i, hexlify(tx_hash[::-1]), height, index,
-                  amt, hexlify(script))
+            #print(k, i, hexlify(tx_hash[::-1]), height, index, amt, hexlify(script))
+            print("{},{},{},{},{}".format( height,
+                    hexlify(tx_hash[::-1]), index, amount, hexlify(script)
+            ))
 
         f.write(struct.pack('<QQ', amt, len(script)))
         f.write(script)
