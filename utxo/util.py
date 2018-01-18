@@ -3,6 +3,7 @@ import os
 import struct
 
 from binascii import hexlify
+from utxo.b128 import decompress_amount
 
 
 def utxo_file_name(directory, i):
@@ -23,7 +24,8 @@ def read_utxo_file(f):
         script = f.read(sz)
 
         assert f.read(1) == '\n'
-        print(amt, hexlify(script))
+        amount =  "%d.%08d" %  (amt / 100000000 , amt % 100000000 )
+        print("{},{}".format(amount, hexlify(script)))
         head = f.read(16)
 
 
