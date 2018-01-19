@@ -49,22 +49,20 @@ def read_utxo_file(f):
             z          = b'\00'+public_key
             z          = base58.b58encode_check(z)
             #print("multisig,{},{},{}".format(amount, z, hexlify(script)))
-            #print("{},,{}".format(amount, hexlify(script)))
+            #print("multisig,{},,{}".format(amount, hexlify(script)))
         elif data[-2:] == b'ac':
             #print len(data), len(script)
             # P2PK 
             if data[0:2] == b'41':
-                offset = 64
+                offset = 65
             elif data[0:2] == b'21':
                 offset  = 33
             
             pubkey = script[1:1+offset]
-            print hexlify(pubkey)
-            print len(pubkey)
+            #print hexlify(pubkey)
+            #print len(pubkey)
             pubkeyhash = ripemd160(sha256(pubkey).digest())
-            print hexlify(pubkeyhash)
-            #pubkey = ripemd160(pubkey)
-            #pubkey = ripemd160(pubkey)
+            #print hexlify(pubkeyhash)
 #$ ./src/bitcoin-cli decodescript 21027d2c5eb464f14629be269b60bd3b28a30f36159ac5a4dae3e4fe5d2002798e1eac                                                                                        {
 #"asm": "027d2c5eb464f14629be269b60bd3b28a30f36159ac5a4dae3e4fe5d2002798e1e OP_CHECKSIG",
 #"reqSigs": 1,
@@ -77,16 +75,15 @@ def read_utxo_file(f):
 
             z          = '\00'+pubkeyhash
             z          = base58.b58encode_check(z)
-            print("p2pk,{},{},{}".format(amount, z, hexlify(script)))
-            #print("p2pk: {},,{}".format(amount, hexlify(script)))
+            #print("p2pk,{},{},{}".format(amount, z, hexlify(script)))
         elif data[:4] == b'0014':
             print("P2WPKH,{},,{}".format(amount, hexlify(script)))
         elif data[:4] == b'0020':
             print("P2WSH,{},,{}".format(amount, hexlify(script)))
         elif data[:3] == b'160014':
-            print("'P2WPKH embedded in P2SH',{},,{}".format(amount, hexlify(script)))
+            print("P2WPKH_embedded,{},,{}".format(amount, hexlify(script)))
         elif data[:2] == b'a914' and data[-1] == b'\x87':
-            print("'P2WSH embedded in P2SH',{},,{}".format(amount, hexlify(script)))
+            print("P2WSH_embedded,{},,{}".format(amount, hexlify(script)))
         else:
             print("unknown: {},,{}".format(amount, hexlify(script)))
 
