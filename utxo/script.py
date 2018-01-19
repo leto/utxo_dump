@@ -1,10 +1,10 @@
 from utxo.util import ripemd160
 
-OP_DUP = chr(0x76)
-OP_HASH160 = chr(0xa9)
+OP_DUP         = chr(0x76)
+OP_HASH160     = chr(0xa9)
 OP_EQUALVERIFY = chr(0x88)
-OP_CHECKSIG = chr(0xac)
-OP_EQUAL = chr(0x87)
+OP_CHECKSIG    = chr(0xac)
+OP_EQUAL       = chr(0x87)
 
 WITNESS_VERSION = chr(0)
 LOCKIN_BLOCK = 400000
