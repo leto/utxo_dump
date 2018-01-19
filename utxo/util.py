@@ -4,9 +4,9 @@ import struct
 import base58
 import secp256k1
 
-from binascii import hexlify
+from binascii import hexlify, unhexlify
 from utxo.b128 import decompress_amount
-
+from hashlib import sha256
 
 def utxo_file_name(directory, i):
     return os.path.join(directory, "utxo_{:06}.bin".format(i))
@@ -51,23 +51,31 @@ def read_utxo_file(f):
             #print("multisig,{},{},{}".format(amount, z, hexlify(script)))
             #print("{},,{}".format(amount, hexlify(script)))
         elif data[-2:] == b'ac':
-            print len(data), len(script)
+            #print len(data), len(script)
             # P2PK 
-            comp_type = 4
             if data[0:2] == b'41':
                 offset = 64
             elif data[0:2] == b'21':
-                comp_type = 5
-                offset  = 32
+                offset  = 33
+            
+            pubkey = script[1:1+offset]
+            print hexlify(pubkey)
+            print len(pubkey)
+            pubkeyhash = ripemd160(sha256(pubkey).digest())
+            print hexlify(pubkeyhash)
+            #pubkey = ripemd160(pubkey)
+            #pubkey = ripemd160(pubkey)
+#$ ./src/bitcoin-cli decodescript 21027d2c5eb464f14629be269b60bd3b28a30f36159ac5a4dae3e4fe5d2002798e1eac                                                                                        {
+#"asm": "027d2c5eb464f14629be269b60bd3b28a30f36159ac5a4dae3e4fe5d2002798e1e OP_CHECKSIG",
+#"reqSigs": 1,
+#"type": "pubkey",
+#"addresses": [
+#"1KTQv1DpmYYA5e2p31jkGNVs6aSCReay2A"
+#  ],
+#"p2sh": "3E5J3Tx6bNapfUbTBRvjLXgEPJQyYPDCX9"
+#}
 
-            comp_pubkey = chr(comp_type - 2) + script[2:2+offset]
-            print len(comp_pubkey)
-            pubkey = secp256k1.PublicKey(
-                comp_pubkey, raw=True
-            ).serialize(compressed=False)
-
-            # TODO: proper prefix?
-            z          = b'\00'+pubkey
+            z          = '\00'+pubkeyhash
             z          = base58.b58encode_check(z)
             print("p2pk,{},{},{}".format(amount, z, hexlify(script)))
             #print("p2pk: {},,{}".format(amount, hexlify(script)))
