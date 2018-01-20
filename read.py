@@ -11,12 +11,16 @@ args = parser.parse_args()
 
 utxo_dir = args.utxo_dir
 filenum = args.filenum
+total_amount = 0
 assert isdir(utxo_dir)
 
 if filenum is not None:
-    read_utxos(utxo_dir, filenum)
+    total_amount = read_utxos(utxo_dir, filenum)
 else:
     i = 0
     while isfile(utxo_file_name(utxo_dir, i)):
-        read_utxos(utxo_dir, i)
+        total_amount += read_utxos(utxo_dir, i)
         i += 1
+
+amount        =  "%d.%08d" %  (total_amount / 100000000 , total_amount % 100000000 )
+print amount
