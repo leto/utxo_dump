@@ -70,6 +70,7 @@ def read_utxo_file(f):
             z          = base58.b58encode_check(z)
             print("p2pk,{},{},{}".format(amount, z, hexlify(script)))
         elif data[:4] == b'0014':
+            # https://github.com/petertodd/python-bitcoinlib/blob/master/bitcoin/core/script.py
             print("P2WPKH,{},,{}".format(amount, hexlify(script)))
         elif data[:4] == b'0020':
             print("P2WSH,{},,{}".format(amount, hexlify(script)))

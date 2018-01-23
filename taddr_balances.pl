@@ -8,11 +8,13 @@ my %totals;
 my %utxos;
 my $utxos = 0;
 my $total = 0;
+my $total_above = 0;
+my $total_below = 0;
 my $avg   = 0;
 my $total_length = 0;
 my %taddrs;
-my $dust = shift || 0.00115260;
-my $dusts;
+my $dust = shift || 0.01;
+my $dusts = 0;
 my $above_dusts = 0;
 
 while (<>) {
@@ -35,10 +37,14 @@ while (my ($taddr,$amount) = each %taddrs) {
 	if ($amount >= $dust) {
 		print "$taddr,$amount\n";
 		$above_dusts++;
+		$total_above += $amount;
 	} else {
 		$dusts++;
+		$total_below += $amount;
 	}
 
 }
+$total_below = sprintf "%2.3f", $total_below;
+$total_above = sprintf "%2.3f", $total_above;
 my $total_taddrs = keys %taddrs;
-print "total=$total, $utxos UTXOs, $total_taddrs taddrs, $dusts taddrs below, $above_dusts above, dust=$dust\n";
+print "total=$total, $utxos UTXOs, $total_taddrs taddrs, $dusts taddrs below (${total_below}BTC), $above_dusts above (${total_above}BTC), dust=$dust\n";
