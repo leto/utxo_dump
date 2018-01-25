@@ -9,17 +9,26 @@ from utxo.script import OP_DUP, OP_HASH160, OP_EQUAL, \
     OP_EQUALVERIFY, OP_CHECKSIG
 
 
-def ldb_iter(datadir):
+def ldb_iter(datadir, ldb_prefix):
     db = plyvel.DB(os.path.join(datadir, "chainstate"), compression=None)
-    obf_key = map(ord, db.get((unhexlify("0e00") + "obfuscate_key"))[1:])
+
+    # Load obfuscation key (if it exists)
+    o_key = db.get((unhexlify("0e00") + "obfuscate_key"))
+
+    # If the key exists, the leading byte indicates the length of the key (8 byte by default). If there is no key,
+    # 8-byte zeros are used (since the key will be XORed with the given values).
+    if o_key is not None:
+        o_key = o_key[2:]
 
     def norm(raw):
         key, value = raw
-        value = deobfuscate(obf_key, value)
+	if o_key is not None:
+	    value = deobfuscate(o_key, value)
 
         return parse_ldb_value(key, value)
 
-    it = db.iterator(prefix=b'C')
+    it = db.iterator(prefix=ldb_prefix)
+    print "prefix=" + ldb_prefix
     return itertools.imap(norm, it)
 
 

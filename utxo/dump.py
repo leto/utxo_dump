@@ -16,22 +16,27 @@ def snap_utxos(bitcoind, bitcoind_datadir, stop_block):
     os.system(cmd)
 
 
-def dump_utxos(datadir, output_dir, n, convert_segwit, maxT=0, debug=True):
+def dump_utxos(datadir, output_dir, n, convert_segwit, maxT=0, debug=True, prefix='new'):
+    if prefix == 'old':
+        prefix = b'c'
+    else:
+        prefix = b'C'
 
     i = 0
     k = 0
 
     f = new_utxo_file(output_dir, k)
-    for value in ldb_iter(datadir):
+    print "Created k=0 file"
+    for value in ldb_iter(datadir, prefix):
+	print "Found iter value"
 
         tx_hash, height, index, amt, script = value
         if convert_segwit:
+	    print "unwitnessing"
             script = unwitness(script, debug)
-
 
         amount =  "%d.%08d" %  (amt / 100000000 , amt % 100000000 )
         if debug:
-            #print(k, i, hexlify(tx_hash[::-1]), height, index, amt, hexlify(script))
             print("{},{},{},{},{}".format( height,
                     hexlify(tx_hash[::-1]), index, amount, hexlify(script)
             ))
@@ -52,3 +57,4 @@ def dump_utxos(datadir, output_dir, n, convert_segwit, maxT=0, debug=True):
             break
 
     f.close()
+    print "Finished dumping UTXOs"

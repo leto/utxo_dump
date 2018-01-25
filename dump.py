@@ -9,6 +9,7 @@ parser = ArgumentParser()
 parser.add_argument('bitcoind_datadir')
 parser.add_argument('utxo_dir')
 
+parser.add_argument('--prefix', type=str, default='old')
 parser.add_argument('--nperfile', type=int, default=10E3)
 parser.add_argument('--transform_segwit', type=bool, default=True)
 
@@ -33,5 +34,7 @@ if(args.reindex or args.bitcoind or args.blockheight):
     assert args.reindex and args.bitcoind is not None and args.blockheight >= 0
     snap_utxos(args.bitcoind, args.bitcoind_datadir, args.blockheight)
 
+print "prefix=" + args.prefix
+
 dump_utxos(args.bitcoind_datadir, args.utxo_dir, args.nperfile,
-           args.transform_segwit, args.maxutxos, debug=args.verbose)
+           args.transform_segwit, args.maxutxos, debug=args.verbose, prefix=args.prefix)
