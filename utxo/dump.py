@@ -28,12 +28,16 @@ def dump_utxos(datadir, output_dir, n, convert_segwit, maxT=0, debug=True, prefi
     f = new_utxo_file(output_dir, k)
     print "Created k=0 file"
     for value in ldb_iter(datadir, prefix):
-	print "Found iter value"
+        print "Found iter value"
 
-        tx_hash, height, index, amt, script = value
-        if convert_segwit:
-	    print "unwitnessing"
-            script = unwitness(script, debug)
+        if prefix == b'C':
+            tx_hash, height, index, amt, script = value
+        else:
+            height, index, amt, script = value
+
+        #if convert_segwit:
+            #print "unwitnessing"
+            #script = unwitness(script, debug)
 
         amount =  "%d.%08d" %  (amt / 100000000 , amt % 100000000 )
         if debug:
@@ -56,5 +60,5 @@ def dump_utxos(datadir, output_dir, n, convert_segwit, maxT=0, debug=True, prefi
         if maxT != 0 and i >= maxT:
             break
 
-    f.close()
     print "Finished dumping UTXOs"
+    f.close()
