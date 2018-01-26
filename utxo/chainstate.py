@@ -5,8 +5,9 @@ import plyvel
 import secp256k1
 
 from binascii import unhexlify, hexlify
-from utxo.script import OP_DUP, OP_HASH160, OP_EQUAL, \
-    OP_EQUALVERIFY, OP_CHECKSIG
+from utxo.script import OP_DUP, OP_HASH160, OP_EQUAL,  OP_EQUALVERIFY, OP_CHECKSIG
+
+NSPECIALSCRIPTS = 6
 
 def ldb_iter(datadir, ldb_prefix):
     db = plyvel.DB(os.path.join(datadir, "chainstate"), compression=None)
@@ -36,6 +37,9 @@ def ldb_iter(datadir, ldb_prefix):
 
 def parse_old_ldb_value(key, utxo):
     "Extract UTXOs from 0.8-0.14.x"
+
+    utxo = hexlify(utxo)
+    print utxo
     # Version is extracted from the first varint of the serialized utxo
     version, offset = b128.parse(utxo)
 
@@ -62,11 +66,11 @@ def parse_old_ldb_value(key, utxo):
     if n > 0:
         bitvector = ""
         while n:
-            data = utxo[offset:offset+1]
-            if data != b'0':
+            data = utxo[offset:offset+2]
+            if data != b'00':
                 n -= 1
             bitvector += data
-            offset += 1
+            offset += 2
 
         bitvector = hexlify(bitvector)
         print "bitvector=" + bitvector
@@ -76,8 +80,6 @@ def parse_old_ldb_value(key, utxo):
         bin_data = format(int(change_endianness(bitvector), 16), '0'+str(n*8)+'b')[::-1]
         print "bin_data=" + str(bin_data)
         print "len(bin_data) = " + str(len(bin_data))
-        bin_data = unhexlify(bin_data)
-        print "unhex bin_data=" + str(bin_data)
 
         # Every position (i) with a 1 encodes the index of a non-spent output as i+2, since the two first outs (v[0] and
         # v[1] has been already counted)
@@ -88,13 +90,11 @@ def parse_old_ldb_value(key, utxo):
         # Finally, the first two vouts are included to the list (if they are non-spent).
         vout += extended_vout
 
-    print hexlify(utxo)
-
     # Once the number of outs and their index is known, they could be parsed.
     outs = []
     print "iterating vouts"
     for i in vout:
-        print i, vout[i]
+        #print i, vout[i]
         # The satoshi amount is parsed, decoded and decompressed.
         amount, offset  = b128.parse(utxo, offset)
         amount          = b128.decompress_amount(amount)
@@ -106,10 +106,10 @@ def parse_old_ldb_value(key, utxo):
         # If 2-5 is found, the following bytes encode a public key. The first byte in this case should be also included,
         # since it determines the format of the key.
         if out_type in [0, 1]:
-            data_size = 20  # 20 bytes
+            data_size = 40  # 20 bytes
         elif out_type in [2, 3, 4, 5]:
-            data_size = 33  # 33 bytes (1 byte for the type + 32 bytes of data)
-            offset   -= 1
+            data_size = 66  # 33 bytes (1 byte for the type + 32 bytes of data)
+            offset   -= 2 
         # Finally, if another value is found, it represents the length of the following data, which is uncompressed.
         else:
             data_size = (out_type - NSPECIALSCRIPTS) * 2  # If the data is not compacted, the out_type corresponds
@@ -137,6 +137,7 @@ def change_endianness(x):
     """
     # If there is an odd number of elements, we make it even by adding a 0
     if (len(x) % 2) == 1:
+        print "adding zero"
         x += "0"
     y = x.decode('hex')
     z = y[::-1]
