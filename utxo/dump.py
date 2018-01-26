@@ -26,7 +26,7 @@ def dump_utxos(datadir, output_dir, n, convert_segwit, maxT=0, debug=True, prefi
     k = 0
 
     f = new_utxo_file(output_dir, k)
-    print "Created k=0 file"
+
     for value in ldb_iter(datadir, prefix):
         if prefix == b'C':
             tx_hash, height, index, amt, script = value
@@ -52,8 +52,8 @@ def dump_utxos(datadir, output_dir, n, convert_segwit, maxT=0, debug=True, prefi
         else:
             height, outs = value
             #print "outs=" + str(outs)
-            for k in range(0,len(outs)):
-                index, amt, out_type, script = outs[k]
+            for j in range(0,len(outs)):
+                index, amt, out_type, script = outs[j]
                 if convert_segwit:
                     script = unwitness(script, debug)
                 f.write(struct.pack('<QQ', amt, len(script)))

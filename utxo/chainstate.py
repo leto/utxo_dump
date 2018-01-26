@@ -62,17 +62,18 @@ def parse_old_ldb_value(key, utxo):
     if n > 0:
         bitvector = ""
         while n:
-            data = utxo[offset:offset+2]
-            if data != "00":
+            data = utxo[offset:offset+1]
+            if data != b'00':
                 n -= 1
             bitvector += data
-            offset += 2
+            offset += 1
 
         bitvector = hexlify(bitvector)
         #print "bitvector=" + bitvector
         # Once the value is parsed, the endianness of the value is switched from LE to BE and the binary representation
         # of the value is checked to identify the non-spent output indexes.
         bin_data = format(int(change_endianness(bitvector), 16), '0'+str(n*8)+'b')[::-1]
+        #print "len(bin_data) = " + str(len(bin_data))
 
         # Every position (i) with a 1 encodes the index of a non-spent output as i+2, since the two first outs (v[0] and
         # v[1] has been already counted)
@@ -85,9 +86,6 @@ def parse_old_ldb_value(key, utxo):
 
     # Once the number of outs and their index is known, they could be parsed.
     outs = []
-    out_type = None
-    amount   = 0
-    script   = None
     for i in vout:
         # The satoshi amount is parsed, decoded and decompressed.
         amount, offset  = b128.parse(utxo, offset)
@@ -103,7 +101,7 @@ def parse_old_ldb_value(key, utxo):
             data_size = 20  # 20 bytes
         elif out_type in [2, 3, 4, 5]:
             data_size = 33  # 33 bytes (1 byte for the type + 32 bytes of data)
-            offset   -= 2
+            offset   -= 1
         # Finally, if another value is found, it represents the length of the following data, which is uncompressed.
         else:
             data_size = (out_type - NSPECIALSCRIPTS) * 2  # If the data is not compacted, the out_type corresponds
