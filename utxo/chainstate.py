@@ -63,17 +63,21 @@ def parse_old_ldb_value(key, utxo):
         bitvector = ""
         while n:
             data = utxo[offset:offset+1]
-            if data != b'00':
+            if data != b'0':
                 n -= 1
             bitvector += data
             offset += 1
 
         bitvector = hexlify(bitvector)
-        #print "bitvector=" + bitvector
+        print "bitvector=" + bitvector
         # Once the value is parsed, the endianness of the value is switched from LE to BE and the binary representation
         # of the value is checked to identify the non-spent output indexes.
+        print "len(bitvector) = " + str(len(bitvector))
         bin_data = format(int(change_endianness(bitvector), 16), '0'+str(n*8)+'b')[::-1]
-        #print "len(bin_data) = " + str(len(bin_data))
+        print "bin_data=" + str(bin_data)
+        print "len(bin_data) = " + str(len(bin_data))
+        bin_data = unhexlify(bin_data)
+        print "unhex bin_data=" + str(bin_data)
 
         # Every position (i) with a 1 encodes the index of a non-spent output as i+2, since the two first outs (v[0] and
         # v[1] has been already counted)
@@ -84,9 +88,13 @@ def parse_old_ldb_value(key, utxo):
         # Finally, the first two vouts are included to the list (if they are non-spent).
         vout += extended_vout
 
+    print hexlify(utxo)
+
     # Once the number of outs and their index is known, they could be parsed.
     outs = []
+    print "iterating vouts"
     for i in vout:
+        print i, vout[i]
         # The satoshi amount is parsed, decoded and decompressed.
         amount, offset  = b128.parse(utxo, offset)
         amount          = b128.decompress_amount(amount)
@@ -105,7 +113,7 @@ def parse_old_ldb_value(key, utxo):
         # Finally, if another value is found, it represents the length of the following data, which is uncompressed.
         else:
             data_size = (out_type - NSPECIALSCRIPTS) * 2  # If the data is not compacted, the out_type corresponds
-            # to the data size adding the number os special scripts (nSpecialScripts).
+            # to the data size adding the number of special scripts (nSpecialScripts).
 
         # And finally the address (the hash160 of the public key actually)
         script, offset = utxo[offset:offset+data_size], offset + data_size

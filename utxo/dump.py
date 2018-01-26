@@ -60,7 +60,7 @@ def dump_utxos(datadir, output_dir, n, convert_segwit, maxT=0, debug=True, prefi
                 f.write(script)
                 f.write('\n')
 
-                amount =  "%d.%08d" %  (amt / 100000000 , amt % 100000000 )
+                #amount =  "%d.%08d" %  (amt / 100000000 , amt % 100000000 )
                 print("{},{},{},{}".format( height, index, amount, hexlify(script)))
 
                 i += 1
@@ -73,6 +73,7 @@ def dump_utxos(datadir, output_dir, n, convert_segwit, maxT=0, debug=True, prefi
 
             if maxT != 0 and i >= maxT:
                 break
+        exit()
 
 
     print "Finished dumping " + str(i) + " UTXOs"
