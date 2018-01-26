@@ -69,7 +69,7 @@ def parse_old_ldb_value(key, utxo):
             offset += 2
 
         bitvector = hexlify(bitvector)
-        print "bitvector=" + bitvector
+        #print "bitvector=" + bitvector
         # Once the value is parsed, the endianness of the value is switched from LE to BE and the binary representation
         # of the value is checked to identify the non-spent output indexes.
         bin_data = format(int(change_endianness(bitvector), 16), '0'+str(n*8)+'b')[::-1]
@@ -85,6 +85,9 @@ def parse_old_ldb_value(key, utxo):
 
     # Once the number of outs and their index is known, they could be parsed.
     outs = []
+    out_type = None
+    amount   = 0
+    script   = None
     for i in vout:
         # The satoshi amount is parsed, decoded and decompressed.
         amount, offset  = b128.parse(utxo, offset)
@@ -97,10 +100,10 @@ def parse_old_ldb_value(key, utxo):
         # If 2-5 is found, the following bytes encode a public key. The first byte in this case should be also included,
         # since it determines the format of the key.
         if out_type in [0, 1]:
-            data_size = 40  # 20 bytes
+            data_size = 20  # 20 bytes
         elif out_type in [2, 3, 4, 5]:
-            data_size = 66  # 33 bytes (1 byte for the type + 32 bytes of data)
-            offset -= 2
+            data_size = 33  # 33 bytes (1 byte for the type + 32 bytes of data)
+            offset   -= 2
         # Finally, if another value is found, it represents the length of the following data, which is uncompressed.
         else:
             data_size = (out_type - NSPECIALSCRIPTS) * 2  # If the data is not compacted, the out_type corresponds
@@ -108,13 +111,13 @@ def parse_old_ldb_value(key, utxo):
 
         # And finally the address (the hash160 of the public key actually)
         script, offset = utxo[offset:offset+data_size], offset + data_size
-        parsed_utxo = [i, amount, script]
+        parsed_utxo = [i, amount, out_type,  script]
         outs.append( parsed_utxo )
 
     # Once all the outs are processed, the block height is parsed
     height, offset = b128.parse(utxo, offset)
 
-    return [ height, outs ]
+    return height, outs
 
 
 # from bitcoin_tools
