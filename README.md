@@ -4,7 +4,8 @@ This talks directly to the internal Bitcoin LevelDB to dump UTXO data, using Pyt
 
 # Install
 
-pip install -r requirements.txt
+	sudo apt-get install libleveldb-dev
+	pip install -r requirements.txt
 
 # Example
 
