@@ -47,4 +47,4 @@ while (my ($taddr,$amount) = each %taddrs) {
 $total_below = sprintf "%2.3f", $total_below;
 $total_above = sprintf "%2.3f", $total_above;
 my $total_taddrs = keys %taddrs;
-print "total=$total, $utxos UTXOs, $total_taddrs taddrs, $dusts taddrs below (${total_below}BTC), $above_dusts above (${total_above}BTC), dust=$dust\n";
+warn "total=$total, $utxos UTXOs, $total_taddrs taddrs, $dusts taddrs below (${total_below}BTC), $above_dusts above (${total_above}BTC), dust=$dust\n";

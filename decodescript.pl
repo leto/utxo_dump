@@ -5,6 +5,10 @@ use warnings;
 no warnings 'experimental';
 use JSON;
 use Data::Dumper;
+use Memoize;
+
+# Many utxos are repeated, this saves us a lot of work and time 
+memoize('taddr_of_utxo');
 
 my $ignored = 0;
 sub taddr_of_utxo {
@@ -14,9 +18,10 @@ sub taddr_of_utxo {
 	my $data    = decode_json($json);
 	my $taddr;
 
-	# be generous
 	if ($data->{p2sh}) {
 		$taddr = $data->{p2sh};
+	} else {
+		$ignored++;
 	}
 	return $taddr;
 }
